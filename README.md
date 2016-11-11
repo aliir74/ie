@@ -9,7 +9,7 @@ at the Amirkabir University of Tech. under supervision of
 
 - [Ehsan Mokhtari](https://github.com/ehsanm94)
 - [Sajjad Rahnama](https://github.com/sajjadrahnama7)
-- [Pooya Parsa](github.com/pi0)
+- [Pooya Parsa](https://github.com/pi0)
 - [Saman Fekri](https://github.com/SamanFekri)
 - Moniba Keymanesh
 - Pooria Barghi
