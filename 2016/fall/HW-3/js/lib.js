@@ -1,5 +1,5 @@
 /*
- Backend Library for MineSweeper Project
+ Back-end Library for MineSweeper Project
  Please Make Pull Requests to https://github.com/AUT-CEIT/ie for fixes
  Released under MIT License.
  */
@@ -7,7 +7,7 @@
 /**
  * Make game.xml
  * @param {Function} [cb] - cb(xmlStr)
- * @return {String} {@link file://../schema/game.xsd|See Here}
+ * @return {String} game.xsd xml {@link https://rawgit.com/AUT-CEIT/ie/master/2016/fall/HW-3/schema/game.xsd}
  */
 function getGameXML(cb) {
     // Simple Static Game Levels
@@ -32,9 +32,9 @@ window.getGameXML = getGameXML;
 
 /**
  * Make level.xml
- * @param {String} request {@link file://../schema/new_game.xsd|See Here}
+ * @param {String} request {@link https://rawgit.com/AUT-CEIT/ie/master/2016/fall/HW-3/schema/new_game.xsd}
  * @param {Function} [cb] - cb(xmlStr)
- * @return {String} {@link file://../schema/level.xsd|See Here}
+ * @return {String} level.xsd xml {@link https://rawgit.com/AUT-CEIT/ie/master/2016/fall/HW-3/schema/level.xsd}
  */
 function getNewGame(request, cb) {
 
