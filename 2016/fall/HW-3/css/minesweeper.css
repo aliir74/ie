@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 
 /*
     Edit Me If needed
@@ -149,6 +149,10 @@ body {
     font-size: .75rem;
     text-align: center;
     pointer-events: auto;
+}
+
+.grid span.flag:after, .grid span[data-flag='true']:after  {
+	content: '🏁';
 }
 
 .grid span.active:after {
