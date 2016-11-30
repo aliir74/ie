@@ -15,8 +15,8 @@ function getGameXML(cb) {
         <game id="minesweeper" title="Minesweeper Online" >
             <levels default ="1">
                 <level id="1" title="Beginner!" timer="true">
-                    <rows>10</rows>
-                    <cols>10</cols>
+                    <rows>9</rows>
+                    <cols>9</cols>
                     <mines>5</mines>
                     <time>120</time>
                 </level>
