@@ -1,7 +1,59 @@
 // Test Funcs
 // See Inspect Element's Console Log Output
 
-getGameXML();
+createModal();
+createWindow();
+
+var game;
+var levels = [
+    {
+        id:1,
+        title:"Beginner!",
+        timer:true,
+        rows:10,
+        cols:10,
+        mines:5,
+        time:120,
+    },
+];
+var default_level;
+var xml_str;
+
+getGameXML(function callback(xml_str) {
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xml_str, "text/xml");
+    game = xmlDoc.getElementsByTagName("game")[0];
+    if(game.getAttribute("id") == "minesweeper") {
+        //alert(game.getAttribute('title'));
+        document.getElementById('game-title').textContent = game.getAttribute('title');
+        var levelsTag = xmlDoc.getElementsByTagName("levels")[0];
+        default_level = levelsTag.getAttribute('default');
+        var levelTag = xmlDoc.getElementsByTagName('level');
+        //alert(levelTag.length)
+        for(i = 0; i < levelTag.length; i++) {
+            var curLevel = levelTag[i];
+            //alert(curLevel.childNodes.length);
+            var curId = curLevel.getAttribute('id');
+            var curTitle = curLevel.getAttribute('title');
+            var curTimer = curLevel.getAttribute('timer');
+            //var rows = curLevel.childNodes[0].nodeName;
+            var rows = xmlDoc.getElementsByTagName('rows')[i].innerHTML;
+            var cols = xmlDoc.getElementsByTagName('cols')[i].innerHTML
+            var mines = xmlDoc.getElementsByTagName('mines')[i].innerHTML
+            var time = xmlDoc.getElementsByTagName('time')[i].innerHTML;
+            levels[i] = {id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time};
+          //  console.log({id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time});
+        }
+
+        console.log("xml parsed!");
+        //console.log(levels);
+    } else {
+        alert("game's tag id is incorrect ( " + game.getAttribute("id") + " )");
+    }
+});
+
+
+
 
 getNewGame(`
     <request>
@@ -83,5 +135,3 @@ function createWindow() {
 
 }
 
-createModal();
-createWindow();
