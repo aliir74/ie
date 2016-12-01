@@ -1,8 +1,12 @@
 // Test Funcs
 // See Inspect Element's Console Log Output
 
+//step 2 validate?!
+
 createModal();
 createWindow();
+document.body.setAttribute('onload', getNewGame());
+
 
 var game;
 var levels = [
@@ -53,7 +57,43 @@ getGameXML(function callback(xml_str) {
 });
 
 
+function makeXSL() {
+    var xml= `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+            <xsl:template match="/grid/row/col">
+                <span row='{../@row}'
+                        col='{@col}'
+                        mine='{@mine}'></span>
+            </xsl:template>
+        </xsl:stylesheet>
+        `;
+    return new DOMParser().parseFromString(xml,"text/xml");
 
+}
+
+function newGame() {
+    var requestXML = `
+        <request>
+        <rows>`+levels[0].rows+`</rows>
+        <cols>`+levels[0].cols+`</cols>
+        <mines>`+levels[0].mines+`</mines>
+        </request>
+        `;
+
+    getNewGame(requestXML, function (xmlStr) {
+// Process and convert xmlStr to DOM using XSLTProcessor
+        xsltProcessor = new XSLTProcessor();
+        xsltProcessor.importStylesheet(makeXSL());
+        resultDocument = xsltProcessor.transformToFragment(xmlStr, document);
+        console.log(1000);
+        alert(resultDocument);
+        console.log(resultDocument);
+        document.getElementById('grid').appendChild(resultDocument);
+
+
+    });
+}
 
 getNewGame(`
     <request>
@@ -126,12 +166,17 @@ function createWindow() {
     var smile = document.createElement("span");
     smile.className += 'smile';
     smile.setAttribute('data-value', 'normal');
+    smile.setAttribute('onload', 'newGame()');
     topDiv.appendChild(smile);
 
     var counter2 = document.createElement("span");
     counter2.className += 'counter';
     counter2.innerHTML = '321';
     topDiv.appendChild(counter2);
+
+    var grid = document.createElement('div');
+    grid.className += 'grid';
+    myWindow.appendChild(grid);
 
 }
 
