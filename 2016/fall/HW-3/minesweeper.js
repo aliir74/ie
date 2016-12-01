@@ -3,9 +3,6 @@
 
 //step 2 validate?!
 
-createModal();
-createWindow();
-document.body.setAttribute('onload', getNewGame());
 
 
 var game;
@@ -23,39 +20,48 @@ var levels = [
 var default_level;
 var xml_str;
 
-getGameXML(function callback(xml_str) {
-    var parser = new DOMParser();
-    var xmlDoc = parser.parseFromString(xml_str, "text/xml");
-    game = xmlDoc.getElementsByTagName("game")[0];
-    if(game.getAttribute("id") == "minesweeper") {
-        //alert(game.getAttribute('title'));
-        document.getElementById('game-title').textContent = game.getAttribute('title');
-        var levelsTag = xmlDoc.getElementsByTagName("levels")[0];
-        default_level = levelsTag.getAttribute('default');
-        var levelTag = xmlDoc.getElementsByTagName('level');
-        //alert(levelTag.length)
-        for(i = 0; i < levelTag.length; i++) {
-            var curLevel = levelTag[i];
-            //alert(curLevel.childNodes.length);
-            var curId = curLevel.getAttribute('id');
-            var curTitle = curLevel.getAttribute('title');
-            var curTimer = curLevel.getAttribute('timer');
-            //var rows = curLevel.childNodes[0].nodeName;
-            var rows = xmlDoc.getElementsByTagName('rows')[i].innerHTML;
-            var cols = xmlDoc.getElementsByTagName('cols')[i].innerHTML
-            var mines = xmlDoc.getElementsByTagName('mines')[i].innerHTML
-            var time = xmlDoc.getElementsByTagName('time')[i].innerHTML;
-            levels[i] = {id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time};
-          //  console.log({id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time});
+function getGameXml2() {
+    getGameXML(function callback(xml_str) {
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(xml_str, "text/xml");
+        game = xmlDoc.getElementsByTagName("game")[0];
+        if (game.getAttribute("id") == "minesweeper") {
+            //alert(game.getAttribute('title'));
+            document.getElementById('game-title').textContent = game.getAttribute('title');
+            var levelsTag = xmlDoc.getElementsByTagName("levels")[0];
+            default_level = levelsTag.getAttribute('default');
+            var levelTag = xmlDoc.getElementsByTagName('level');
+            //alert(levelTag.length)
+            for (i = 0; i < levelTag.length; i++) {
+                var curLevel = levelTag[i];
+                //alert(curLevel.childNodes.length);
+                var curId = curLevel.getAttribute('id');
+                var curTitle = curLevel.getAttribute('title');
+                var curTimer = curLevel.getAttribute('timer');
+                //var rows = curLevel.childNodes[0].nodeName;
+                var rows = xmlDoc.getElementsByTagName('rows')[i].innerHTML;
+                var cols = xmlDoc.getElementsByTagName('cols')[i].innerHTML
+                var mines = xmlDoc.getElementsByTagName('mines')[i].innerHTML
+                var time = xmlDoc.getElementsByTagName('time')[i].innerHTML;
+                levels[i] = {
+                    id: curId,
+                    title: curTitle,
+                    timer: curTimer,
+                    rows: rows,
+                    cols: cols,
+                    mines: mines,
+                    time: time
+                };
+                //  console.log({id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time});
+            }
+
+            console.log("xml parsed!");
+            //console.log(levels);
+        } else {
+            alert("game's tag id is incorrect ( " + game.getAttribute("id") + " )");
         }
-
-        console.log("xml parsed!");
-        //console.log(levels);
-    } else {
-        alert("game's tag id is incorrect ( " + game.getAttribute("id") + " )");
-    }
-});
-
+    });
+}
 
 function makeXSL() {
     var xml= `
@@ -73,6 +79,7 @@ function makeXSL() {
 }
 
 function newGame() {
+   // alert('khar');
     var requestXML = `
         <request>
         <rows>`+levels[0].rows+`</rows>
@@ -80,20 +87,21 @@ function newGame() {
         <mines>`+levels[0].mines+`</mines>
         </request>
         `;
-
+    //alert(requestXML);
+    console.log(requestXML);
     getNewGame(requestXML, function (xmlStr) {
-// Process and convert xmlStr to DOM using XSLTProcessor
+// Process and convert xmlStr to DOM    using XSLTProcessor
+        var xml = new DOMParser().parseFromString(xmlStr, 'text/xml');
         xsltProcessor = new XSLTProcessor();
         xsltProcessor.importStylesheet(makeXSL());
-        resultDocument = xsltProcessor.transformToFragment(xmlStr, document);
+        resultDocument = xsltProcessor.transformToFragment(xml, document);
         console.log(1000);
         alert(resultDocument);
         console.log(resultDocument);
         document.getElementById('grid').appendChild(resultDocument);
-
-
     });
 }
+
 
 getNewGame(`
     <request>
@@ -166,7 +174,7 @@ function createWindow() {
     var smile = document.createElement("span");
     smile.className += 'smile';
     smile.setAttribute('data-value', 'normal');
-    smile.setAttribute('onload', 'newGame()');
+    smile.setAttribute('onclick', 'newGame()');
     topDiv.appendChild(smile);
 
     var counter2 = document.createElement("span");
@@ -176,7 +184,12 @@ function createWindow() {
 
     var grid = document.createElement('div');
     grid.className += 'grid';
+    grid.setAttribute('id', 'grid');
     myWindow.appendChild(grid);
 
 }
 
+createModal();
+createWindow();
+getGameXml2();
+window.onload = newGame();
