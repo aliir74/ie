@@ -24,6 +24,7 @@ var default_level;
 var xml_str;
 var currentLevel;
 var loose = false;
+var win = false;
 var timer = false; //not started yet
 
 function getGameXml2() {
@@ -87,13 +88,32 @@ function makeXSL() {
 
 }
 
-function newGame() {
+function newGameSmile() {
+    var grid = document.getElementsByClassName('grid')[0];
+    var size = grid.childNodes.length
+    for(i = size-1; i > -1; i--) {
+        grid.removeChild(grid.childNodes[i]);
+    }
+    var levelTitle = prompt('Please enter new level id: ');
+    newGame(levelTitle);
+    start();
+}
+
+function newGame(levelTitle) {
    // alert('khar');
+    var levelAndis = -1
+    for(i = 0; i < levels.length; i++) {
+        if(levelTitle == levels[i].id) {
+            levelAndis = i;
+            break;
+        }
+    }
+    alert(levelAndis);
     var requestXML = `
         <request>
-        <rows>`+levels[0].rows+`</rows>
-        <cols>`+levels[0].cols+`</cols>
-        <mines>`+levels[0].mines+`</mines>
+        <rows>`+levels[levelAndis].rows+`</rows>
+        <cols>`+levels[levelAndis].cols+`</cols>
+        <mines>`+levels[levelAndis].mines+`</mines>
         </request>
         `;
     //alert(requestXML);
@@ -139,7 +159,27 @@ function createModal() {
 
     var btn = document.createElement("button");
     btn.appendChild(document.createTextNode("OK"));
+    btn.setAttribute('onclick', 'hideModal()');
     modalContent.appendChild(btn);
+}
+
+function hideModal() {
+    var inp = document.getElementById('name');
+    var name = inp.value;
+    console.log('name:', name);
+    var correct = true;
+    for (i = 0; i < name.length; i++) {
+        if (name[i] > 'z' || name[i] < 'a') {
+            correct = false;
+        }
+    }
+    if (!correct) {
+        alert('Your name is incorrect!');
+        inp.value = '';
+    } else {
+        //document.getElementsByClassName('modal-content')[0].removeChild(document.getElementsByTagName('button')[0]);
+        document.getElementById('alert-modal').style.display = 'none';
+    }
 }
 
 function createWindow() {
@@ -183,7 +223,7 @@ function createWindow() {
     var smile = document.createElement("span");
     smile.className = 'smile';
     smile.setAttribute('data-value', 'normal');
-    smile.setAttribute('onclick', 'newGame()');
+    smile.setAttribute('onclick', 'newGameSmile()');
     topDiv.appendChild(smile);
 
     var counter2 = document.createElement("span");
@@ -249,7 +289,7 @@ function startTimer() {
             document.getElementsByClassName('counter')[1].innerHTML--;
             //console.log(loose);
             console.log(unvisited);
-            if(unvisited == 0 && document.getElementsByClassName('counter')[0].innerHTML == 0) {
+            if(win || (unvisited == 0 && document.getElementsByClassName('counter')[0].innerHTML == 0)) {
                 clearInterval(numCounter);
                 console.log('You Win!');
                 alert('You Win');
@@ -275,19 +315,24 @@ function onClickEvents(x, e) {
     str = span.className.split(' ');
     //alert(e.button);
     if(e.button == 0) {
+        /*
         var b = true;
+
         for (i = 0; i < str.length; i++) {
             if (str[i] == 'active' || str[i] == 'flag') {
                 b = false;
             }
         }
-        if (b) {
+        */
+        if(span.className == 'active' || span.className == 'revealed') {
+            showAll();
+        } else if(span.className != 'flag') {
             if (span.getAttribute('mine')) {
                 //span.setAttribute('data-value', 'mine');
                 span.className = 'revealed';
                 loose = true;
             } else {
-                span.className = 'active';
+                span.className = 'revealed';
                 revealNeighbors(x);
             }
         }
@@ -295,7 +340,7 @@ function onClickEvents(x, e) {
         var b = true;
         var andis = -1;
         for (i = 0; i < str.length; i++) {
-            if (str[i] == 'flag' || str[i] == 'active') {
+            if (str[i] == 'flag' || str[i] == 'active' || str[i] == 'revealed') {
                 b = false;
                 if(str[i] == 'flag')
                     andis = i;
@@ -319,6 +364,73 @@ function onClickEvents(x, e) {
         alert('right click');
 }
 
+function showAll() {
+    if(document.getElementsByClassName('counter')[0].innerHTML != 0)
+        return;
+    var grid = document.getElementsByClassName('grid')[0];
+    for(i = 0; i < grid.childNodes.length; i++) {
+        if(grid.childNodes[i].className != 'flag') {
+            var count = 0;
+            var number = i + 1;
+            var right = false, left = false, top = false, bottom = false;
+            var num2 = number - 1;
+            //alert(parseInt(1/9))
+            if (parseInt(num2 / 9) > 0)
+                top = true;
+            if (parseInt(num2 / 9) < 8)
+                bottom = true;
+            if (num2 % 9 > 0)
+                left = true;
+            if (num2 % 9 < 8)
+                right = true;
+
+            if (top) {
+                if (document.getElementById('c' + (number - 9)).getAttribute('mine') == 'true')
+                    count++;
+
+                if (right) {
+                    if (document.getElementById('c' + (number - 8)).getAttribute('mine') == 'true')
+                        count++;
+                }
+                if (left) {
+                    if (document.getElementById('c' + (number - 10)).getAttribute('mine') == 'true')
+                        count++;
+                }
+            }
+            if (bottom) {
+                if (document.getElementById('c' + (number + 9)).getAttribute('mine') == 'true')
+                    count++;
+
+                if (right) {
+                    if (document.getElementById('c' + (number + 10)).getAttribute('mine') == 'true')
+                        count++;
+                }
+                if (left) {
+                    if (document.getElementById('c' + (number + 8)).getAttribute('mine') == 'true')
+                        count++;
+                }
+            }
+            if (right) {
+                if (document.getElementById('c' + (number + 1)).getAttribute('mine') == 'true')
+                    count++;
+            }
+            if (left) {
+                if (document.getElementById('c' + (number - 1)).getAttribute('mine') == 'true')
+                    count++;
+            }
+            if(grid.childNodes[i].getAttribute('mine') == 'true') {
+                loose = true;
+                grid.childNodes[i].setAttribute('data-value', 'mine');
+            } else
+                grid.childNodes[i].setAttribute('data-value', count);
+            grid.childNodes[i].className = 'revealed';
+        }
+    }
+    if(loose == false) {
+        win = true;
+    }
+}
+
 function revealNeighbors(x) {
     console.log(x);
     var span = document.getElementById(x);
@@ -329,10 +441,10 @@ function revealNeighbors(x) {
     var number = parseInt(x.slice(1, x.length));
     var right = false, left = false, top = false, bottom = false;
     var num2 = number-1;
-    alert(parseInt(1/9))
+    //alert(parseInt(1/9))
     if(parseInt(num2/9) > 0)
         top = true;
-    if(num2/9 < 8)
+    if(parseInt(num2/9) < 8)
         bottom = true;
     if(num2%9 > 0)
         left = true;
@@ -431,5 +543,5 @@ function revealedCheck(x) {
 createModal();
 createWindow();
 getGameXml2();
-window.onload = newGame();
+window.onload = newGame(1);
 start()
