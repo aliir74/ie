@@ -19,6 +19,9 @@ var levels = [
 ];
 var default_level;
 var xml_str;
+var currentLevel;
+var loose = false;
+var timer = false; //not started yet
 
 function getGameXml2() {
     getGameXML(function callback(xml_str) {
@@ -52,6 +55,10 @@ function getGameXml2() {
                     mines: mines,
                     time: time
                 };
+
+                if(curId == default_level) {
+                    currentLevel = i;
+                }
                 //  console.log({id: curId, title:curTitle, timer: curTimer, rows:rows, cols: cols, mines: mines, time: time});
             }
 
@@ -95,7 +102,7 @@ function newGame() {
         xsltProcessor.importStylesheet(makeXSL());
         resultDocument = xsltProcessor.transformToFragment(xml, document);
         console.log(1000);
-        alert(resultDocument);
+        //alert(resultDocument);
         console.log(resultDocument);
         document.getElementById('grid').appendChild(resultDocument);
     });
@@ -178,7 +185,7 @@ function createWindow() {
 
     var counter2 = document.createElement("span");
     counter2.className += 'counter';
-    counter2.innerHTML = '321';
+    counter2.innerHTML = '100';
     topDiv.appendChild(counter2);
 
     var grid = document.createElement('div');
@@ -188,7 +195,115 @@ function createWindow() {
 
 }
 
+function start() {
+    setCounters();
+    //set timer & ... default value
+    setSpansId();
+    setOnClicks();
+}
+
+function setCounters() {
+    if(levels[currentLevel].timer)
+        document.getElementsByClassName('counter')[1].innerHTML = levels[currentLevel].time;
+    else
+        document.getElementsByClassName('counter')[1].innerHTML = 0;
+
+    var grid = document.getElementsByClassName('grid')[0];
+    var count = 0;
+    for(i = 0; i < grid.childNodes.length; i++) {
+        if(grid.childNodes[i].getAttribute('mine') == 'true') {
+            grid.childNodes[i].setAttribute('data-value', 'mine');
+            count++;
+        }
+    }
+    document.getElementsByClassName('counter')[0].innerHTML = count;
+}
+
+function setOnClicks() {
+    var grid = document.getElementsByClassName('grid')[0];
+    for(i = 0; i < grid.childNodes.length; i++) {
+        grid.childNodes[i].setAttribute(`onclick`, `onClickEvents('`+grid.childNodes[i].getAttribute('id')+`', event)`);
+        //grid.childNodes[i].addEventListener('click', 'clicked', false);
+    }
+}
+
+function setSpansId() {
+    for(i = 0; i < grid.childNodes.length; i++) {
+        grid.childNodes[i].setAttribute('id', 'c'+(i+1));
+        //grid.childNodes[i].addEventListener('click', 'clicked', false);
+    }
+}
+
+function startTimer() {
+    console.log('startTimer');
+    if(levels[currentLevel].timer == false) {
+        console.log('if startTimer');
+        document.getElementsByClassName('counter')[1].innerHTML++;
+    } else if(timer == false){
+        timer = true;
+        var numCounter = setInterval(function () {
+            document.getElementsByClassName('counter')[1].innerHTML--;
+            console.log(loose);
+            if(loose || document.getElementsByClassName('counter')[1].innerHTML <= 0) {
+                clearInterval(numCounter);
+                loose = true;
+                console.log('You loose!');
+                document.getElementsByClassName('smile')[0].setAttribute('data-value', '');
+                alert('You loose!');
+                return;
+            }
+
+        }, 1000)
+
+    }
+}
+
+function onClickEvents(x, e) {
+    startTimer();
+    var span = document.getElementById(x);
+    str = span.className.split(' ');
+    if(e.button == 0) {
+        var b = true;
+        for (i = 0; i < str.length; i++) {
+            if (str[i] == 'active') {
+                b = false;
+            }
+        }
+        if (b) {
+            if (span.getAttribute('mine')) {
+                //span.setAttribute('data-value', 'mine');
+                span.className += 'revealed ';
+                loose = true;
+            } else {
+                span.className += 'active ';
+            }
+        }
+    } else if(e.button == 1) {
+        var b = true;
+        var andis = -1;
+        for (i = 0; i < str.length; i++) {
+            if (str[i] == 'flag') {
+                b = false;
+                andis = i;
+            }
+        }
+        if(b) {
+            span.className += 'flag';
+            document.getElementsByClassName('counter')[0].innerHTML--;
+        } else {
+            span.className = "";
+            for(i = 0; i < str.length; i++) {
+                if(i != andis) {
+                    span.className += str[i]+' ';
+                }
+            }
+            document.getElementsByClassName('counter')[0].innerHTML++;
+        }
+    }
+}
+
 createModal();
 createWindow();
 getGameXml2();
 window.onload = newGame();
+start()
