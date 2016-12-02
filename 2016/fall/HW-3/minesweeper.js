@@ -108,7 +108,7 @@ function newGame(levelTitle) {
             break;
         }
     }
-    alert(levelAndis);
+    //alert(levelAndis);
     var requestXML = `
         <request>
         <rows>`+levels[levelAndis].rows+`</rows>
@@ -261,12 +261,43 @@ function setCounters() {
     document.getElementsByClassName('counter')[0].innerHTML = count;
 
     unvisited = grid.childNodes.length - levels[currentLevel].mines;
+    document.getElementsByClassName('smile')[0].setAttribute('data-value', 'normal');
+}
+
+function onRightClick(x) {
+    startTimer();
+    var span = document.getElementById(x);
+    str = span.className.split(' ');
+    var b = true;
+    var andis = -1;
+    for (i = 0; i < str.length; i++) {
+        if (str[i] == 'flag' || str[i] == 'active' || str[i] == 'revealed') {
+            b = false;
+            if(str[i] == 'flag')
+                andis = i;
+            break;
+        }
+    }
+    if(b) {
+        span.className = 'flag';
+        document.getElementsByClassName('counter')[0].innerHTML--;
+    } else {
+        span.className = "";
+        for(i = 0; i < str.length; i++) {
+            if(i != andis) {
+                span.className = str[i];
+            }
+        }
+        if(andis != -1)
+            document.getElementsByClassName('counter')[0].innerHTML++;
+    }
 }
 
 function setOnClicks() {
     var grid = document.getElementsByClassName('grid')[0];
     for(i = 0; i < grid.childNodes.length; i++) {
         grid.childNodes[i].setAttribute(`onclick`, `onClickEvents('`+grid.childNodes[i].getAttribute('id')+`', event)`);
+        grid.childNodes[i].setAttribute('oncontextmenu', `onRightClick('`+grid.childNodes[i].getAttribute('id')+`')`);
         //grid.childNodes[i].addEventListener('mousedown', 'onClickEvents', false);
     }
 }
@@ -337,29 +368,7 @@ function onClickEvents(x, e) {
             }
         }
     } else if(e.button == 1) {
-        var b = true;
-        var andis = -1;
-        for (i = 0; i < str.length; i++) {
-            if (str[i] == 'flag' || str[i] == 'active' || str[i] == 'revealed') {
-                b = false;
-                if(str[i] == 'flag')
-                    andis = i;
-                break;
-            }
-        }
-        if(b) {
-            span.className = 'flag';
-            document.getElementsByClassName('counter')[0].innerHTML--;
-        } else {
-            span.className = "";
-            for(i = 0; i < str.length; i++) {
-                if(i != andis) {
-                    span.className = str[i];
-                }
-            }
-            if(andis != -1)
-                document.getElementsByClassName('counter')[0].innerHTML++;
-        }
+
     } else if(e.button == 2)
         alert('right click');
 }
