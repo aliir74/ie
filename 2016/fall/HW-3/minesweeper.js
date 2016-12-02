@@ -2,9 +2,9 @@
 // See Inspect Element's Console Log Output
 
 //step 2 validate?!
-
-
-
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
 var game;
 var levels = [
     {
@@ -223,7 +223,7 @@ function setOnClicks() {
     var grid = document.getElementsByClassName('grid')[0];
     for(i = 0; i < grid.childNodes.length; i++) {
         grid.childNodes[i].setAttribute(`onclick`, `onClickEvents('`+grid.childNodes[i].getAttribute('id')+`', event)`);
-        //grid.childNodes[i].addEventListener('click', 'clicked', false);
+        //grid.childNodes[i].addEventListener('mousedown', 'onClickEvents', false);
     }
 }
 
@@ -243,7 +243,7 @@ function startTimer() {
         timer = true;
         var numCounter = setInterval(function () {
             document.getElementsByClassName('counter')[1].innerHTML--;
-            console.log(loose);
+            //console.log(loose);
             if(loose || document.getElementsByClassName('counter')[1].innerHTML <= 0) {
                 clearInterval(numCounter);
                 loose = true;
@@ -262,10 +262,11 @@ function onClickEvents(x, e) {
     startTimer();
     var span = document.getElementById(x);
     str = span.className.split(' ');
+    //alert(e.button);
     if(e.button == 0) {
         var b = true;
         for (i = 0; i < str.length; i++) {
-            if (str[i] == 'active') {
+            if (str[i] == 'active' || str[i] == 'flag') {
                 b = false;
             }
         }
