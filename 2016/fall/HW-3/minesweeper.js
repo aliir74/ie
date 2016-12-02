@@ -1,7 +1,6 @@
 // Test Funcs
 // See Inspect Element's Console Log Output
 
-//step 2 validate?!
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
@@ -109,6 +108,7 @@ function newGame(levelTitle) {
         }
     }
     //alert(levelAndis);
+    currentLevel = levelAndis;
     var requestXML = `
         <request>
         <rows>`+levels[levelAndis].rows+`</rows>
@@ -179,6 +179,7 @@ function hideModal() {
     } else {
         //document.getElementsByClassName('modal-content')[0].removeChild(document.getElementsByTagName('button')[0]);
         document.getElementById('alert-modal').style.display = 'none';
+        document.getElementsByClassName('smile')[0].setAttribute('data-value', 'ok');
     }
 }
 
@@ -262,10 +263,12 @@ function setCounters() {
 
     unvisited = grid.childNodes.length - levels[currentLevel].mines;
     document.getElementsByClassName('smile')[0].setAttribute('data-value', 'normal');
+    document.getElementById('name').value = '';
+    document.getElementById('alert-modal').style.display = 'block';
 }
 
 function onRightClick(x) {
-    startTimer();
+    startTimer(false);
     var span = document.getElementById(x);
     str = span.className.split(' ');
     var b = true;
@@ -309,9 +312,9 @@ function setSpansId() {
     }
 }
 
-function startTimer() {
+function startTimer(countableClick) {
     console.log('startTimer');
-    if(levels[currentLevel].timer == false) {
+    if(levels[currentLevel].timer == false && countableClick)  {
         console.log('if startTimer');
         document.getElementsByClassName('counter')[1].innerHTML++;
     } else if(timer == false){
@@ -323,6 +326,7 @@ function startTimer() {
             if(win || (unvisited == 0 && document.getElementsByClassName('counter')[0].innerHTML == 0)) {
                 clearInterval(numCounter);
                 console.log('You Win!');
+                document.getElementsByClassName('smile')[0].setAttribute('data-value', 'win');
                 alert('You Win');
                 return;
             }
@@ -330,7 +334,7 @@ function startTimer() {
                 clearInterval(numCounter);
                 loose = true;
                 console.log('You loose!');
-                document.getElementsByClassName('smile')[0].setAttribute('data-value', '');
+                document.getElementsByClassName('smile')[0].setAttribute('data-value', 'hover');
                 alert('You loose!');
                 return;
             }
@@ -341,36 +345,29 @@ function startTimer() {
 }
 
 function onClickEvents(x, e) {
-    startTimer();
     var span = document.getElementById(x);
     str = span.className.split(' ');
     //alert(e.button);
     if(e.button == 0) {
-        /*
-        var b = true;
-
-        for (i = 0; i < str.length; i++) {
-            if (str[i] == 'active' || str[i] == 'flag') {
-                b = false;
-            }
-        }
-        */
         if(span.className == 'active' || span.className == 'revealed') {
+            startTimer(false);
             showAll();
         } else if(span.className != 'flag') {
             if (span.getAttribute('mine')) {
+                startTimer(false);
                 //span.setAttribute('data-value', 'mine');
                 span.className = 'revealed';
                 loose = true;
             } else {
+                startTimer(true);
                 span.className = 'revealed';
                 revealNeighbors(x);
             }
         }
     } else if(e.button == 1) {
-
-    } else if(e.button == 2)
-        alert('right click');
+        startTimer(false);
+    //handle question mark;
+    }
 }
 
 function showAll() {
