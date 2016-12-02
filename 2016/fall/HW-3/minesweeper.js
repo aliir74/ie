@@ -5,6 +5,9 @@
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
+
+var unvisited;
+
 var game;
 var levels = [
     {
@@ -121,16 +124,16 @@ function createModal() {
     var modalBar = document.createElement("div");
     document.body.appendChild(modalBar);
     modalBar.setAttribute("id", "alert-modal");
-    modalBar.className += "modal";
+    modalBar.className = "modal";
 
     var modalContent = document.createElement("div");
     modalBar.appendChild(modalContent);
-    modalContent.className += "modal-content";
+    modalContent.className = "modal-content";
 
     var nameInp = document.createElement("input");
     modalContent.appendChild(nameInp);
     nameInp.setAttribute("id", "name");
-    nameInp.className += "field";
+    nameInp.className = "field";
     //palceholder doesn't work?!
     nameInp.setAttribute('placeholder', 'Enter your name');
 
@@ -141,11 +144,11 @@ function createModal() {
 
 function createWindow() {
     var myWindow = document.createElement("div");
-    myWindow.className += "window";
+    myWindow.className = "window";
     document.body.appendChild(myWindow);
 
     var titleBar = document.createElement("div");
-    titleBar.className += "title-bar";
+    titleBar.className = "title-bar";
     myWindow .appendChild(titleBar);
 
     var gameTitle = document.createElement("span");
@@ -157,39 +160,39 @@ function createWindow() {
     titleBar.appendChild(div1);
 
     var btnMinimize = document.createElement("span");
-    btnMinimize.className += "btn";
+    btnMinimize.className = "btn";
     btnMinimize.setAttribute("id", "btn-minimize");
     btnMinimize.innerHTML = "&minus;";
     div1.appendChild(btnMinimize);
 
     var btnClose = document.createElement("span");
-    btnClose.className += "btn";
+    btnClose.className = "btn";
     btnClose.setAttribute("id", "btn-close");
     btnClose.innerHTML = "&times;";
     div1.appendChild(btnClose);
 
     var topDiv = document.createElement("div");
-    topDiv.className += "top";
+    topDiv.className = "top";
     myWindow.appendChild(topDiv);
 
     var counter = document.createElement("span");
-    counter.className += 'counter';
+    counter.className = 'counter';
     counter.innerHTML = '123';
     topDiv.appendChild(counter);
 
     var smile = document.createElement("span");
-    smile.className += 'smile';
+    smile.className = 'smile';
     smile.setAttribute('data-value', 'normal');
     smile.setAttribute('onclick', 'newGame()');
     topDiv.appendChild(smile);
 
     var counter2 = document.createElement("span");
-    counter2.className += 'counter';
+    counter2.className = 'counter';
     counter2.innerHTML = '100';
     topDiv.appendChild(counter2);
 
     var grid = document.createElement('div');
-    grid.className += 'grid';
+    grid.className = 'grid';
     grid.setAttribute('id', 'grid');
     myWindow.appendChild(grid);
 
@@ -197,7 +200,6 @@ function createWindow() {
 
 function start() {
     setCounters();
-    //set timer & ... default value
     setSpansId();
     setOnClicks();
 }
@@ -217,6 +219,8 @@ function setCounters() {
         }
     }
     document.getElementsByClassName('counter')[0].innerHTML = count;
+
+    unvisited = grid.childNodes.length - levels[currentLevel].mines;
 }
 
 function setOnClicks() {
@@ -244,6 +248,13 @@ function startTimer() {
         var numCounter = setInterval(function () {
             document.getElementsByClassName('counter')[1].innerHTML--;
             //console.log(loose);
+            console.log(unvisited);
+            if(unvisited == 0 && document.getElementsByClassName('counter')[0].innerHTML == 0) {
+                clearInterval(numCounter);
+                console.log('You Win!');
+                alert('You Win');
+                return;
+            }
             if(loose || document.getElementsByClassName('counter')[1].innerHTML <= 0) {
                 clearInterval(numCounter);
                 loose = true;
@@ -273,34 +284,148 @@ function onClickEvents(x, e) {
         if (b) {
             if (span.getAttribute('mine')) {
                 //span.setAttribute('data-value', 'mine');
-                span.className += 'revealed ';
+                span.className = 'revealed';
                 loose = true;
             } else {
-                span.className += 'active ';
+                span.className = 'active';
+                revealNeighbors(x);
             }
         }
     } else if(e.button == 1) {
         var b = true;
         var andis = -1;
         for (i = 0; i < str.length; i++) {
-            if (str[i] == 'flag') {
+            if (str[i] == 'flag' || str[i] == 'active') {
                 b = false;
-                andis = i;
+                if(str[i] == 'flag')
+                    andis = i;
+                break;
             }
         }
         if(b) {
-            span.className += 'flag';
+            span.className = 'flag';
             document.getElementsByClassName('counter')[0].innerHTML--;
         } else {
             span.className = "";
             for(i = 0; i < str.length; i++) {
                 if(i != andis) {
-                    span.className += str[i]+' ';
+                    span.className = str[i];
                 }
             }
-            document.getElementsByClassName('counter')[0].innerHTML++;
+            if(andis != -1)
+                document.getElementsByClassName('counter')[0].innerHTML++;
+        }
+    } else if(e.button == 2)
+        alert('right click');
+}
+
+function revealNeighbors(x) {
+    console.log(x);
+    var span = document.getElementById(x);
+    if(span.getAttribute('mine') == 'true' || span.className == 'flag')
+        return;
+
+    var count = 0;
+    var number = parseInt(x.slice(1, x.length));
+    var right = false, left = false, top = false, bottom = false;
+    var num2 = number-1;
+    alert(parseInt(1/9))
+    if(parseInt(num2/9) > 0)
+        top = true;
+    if(num2/9 < 8)
+        bottom = true;
+    if(num2%9 > 0)
+        left = true;
+    if(num2%9 < 8)
+        right = true;
+
+    if(top) {
+        if(document.getElementById('c'+(number-9)).getAttribute('mine') == 'true')
+            count++;
+
+        if(right) {
+            if(document.getElementById('c'+(number-8)).getAttribute('mine') == 'true')
+                count++;
+        }
+        if(left) {
+            if(document.getElementById('c'+(number-10)).getAttribute('mine') == 'true')
+                count++;
         }
     }
+    if(bottom) {
+        if(document.getElementById('c'+(number+9)).getAttribute('mine') == 'true')
+            count++;
+
+        if(right) {
+            if(document.getElementById('c'+(number+10)).getAttribute('mine') == 'true')
+                count++;
+        }
+        if(left) {
+            if(document.getElementById('c'+(number+8)).getAttribute('mine') == 'true')
+                count++;
+        }
+    }
+    if(right) {
+        if(document.getElementById('c'+(number+1)).getAttribute('mine') == 'true')
+            count++;
+    }
+    if(left) {
+        if(document.getElementById('c'+(number-1)).getAttribute('mine') == 'true')
+            count++;
+    }
+
+    span.setAttribute('data-value', count);
+    span.className = 'revealed';
+    unvisited--;
+    if(count != 0)
+        return;
+    //alert(count);
+
+
+    if(top) {
+        if(revealedCheck('c'+(number-9)))
+            revealNeighbors('c'+(number-9));
+        if(right) {
+            if(revealedCheck('c'+(number-8)))
+                revealNeighbors('c'+(number-8))
+        }
+        if(left) {
+            if(revealedCheck('c'+(number-10)))
+                revealNeighbors('c'+(number-10))
+        }
+    }
+    if(bottom) {
+        if(revealedCheck('c'+(number+9)))
+            revealNeighbors('c'+(number+9))
+        if(right) {
+            if(revealedCheck('c'+(number+10)))
+                revealNeighbors('c'+(number+10))
+        }
+        if(left) {
+            if(revealedCheck('c'+(number+8)))
+                revealNeighbors('c'+(number+8))
+        }
+    }
+    if(right) {
+        if(revealedCheck('c'+(number+1)))
+            revealNeighbors('c'+(number+1))
+    }
+    if(left) {
+        if(revealedCheck('c'+(number-1)))
+            revealNeighbors('c'+(number-1))
+    }
+
+    return;
+}
+
+function revealedCheck(x) {
+    var span = document.getElementById(x);
+    var str = span.className.split(' ');
+    for(i = 0; i < str.length; i++) {
+        if(str[i] == 'revealed' || str[i] == 'active')
+            return false;
+    }
+    return true;
 }
 
 createModal();
